@@ -43,7 +43,7 @@ variable "s3name" {
   description = "The name of the bucket."
   type        = string
 }
-variable "region" {
-  description = "The region where the bucket is created"
-  type        = string
-}
+# variable "region" {
+#   description = "The region where the bucket is created"
+#   type        = string
+# }
