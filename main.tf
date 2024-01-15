@@ -79,7 +79,7 @@ resource "aws_lambda_function" "terraform_lambda_func" {
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
-  source_arn    = "arn:aws:s3:::${aws_s3_bucket.bucket.id}"
+  source_arn    = "arn:aws:s3:::${aws_s3_bucket.s3bucket.id}"
   function_name = aws_lambda_function.terraform_lambda_func.function_name
   principal     = "s3.amazonaws.com"
 
