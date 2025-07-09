@@ -24,7 +24,7 @@ EOF
 # Lambda execution role policy resource
 resource "aws_iam_policy" "iam_policy_for_lambda" {
   name        = "${var.name}-iam-policy"
-  path        = "/"
+  path        = var.iam_policy_path
   description = "AWS IAM Policy for managing aws lambda role"
   policy      = <<EOF
 {
@@ -89,6 +89,8 @@ resource "aws_lambda_permission" "apigw_lambda" {
 # Creating s3 resource for invoking to lambda function
 resource "aws_s3_bucket" "s3bucket" {
   bucket = var.s3name
+  force_destroy = var.s3_force_destroy
+  object_lock_enabled = var.s3_object_lock_enabled
   lifecycle {
     ignore_changes = [tags]
   }
@@ -98,17 +100,18 @@ resource "aws_s3_bucket" "s3bucket" {
 resource "aws_s3_bucket_versioning" "versioning_example" {
   bucket = aws_s3_bucket.s3bucket.id
   versioning_configuration {
-    status = "Enabled"
+    status = var.s3_versioning_status
+    mfa_delete = var.mfa_delete
   }
 }
 
 # Creating bucket public access disable resource
 resource "aws_s3_bucket_public_access_block" "example" {
   bucket                  = aws_s3_bucket.s3bucket.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = var.block_public_acls
+  block_public_policy     = var.block_public_policy
+  ignore_public_acls      = var.ignore_public_acls
+  restrict_public_buckets = var.restrict_public_buckets
 }
 
 # Adding S3 bucket as trigger to my lambda and giving the permissions
@@ -119,4 +122,7 @@ resource "aws_s3_bucket_notification" "aws-lambda-trigger" {
     events              = ["s3:ObjectCreated:*", "s3:ObjectRemoved:*"]
 
   }
+  depends_on = [
+    aws_lambda_permission.apigw_lambda
+  ]
 }
